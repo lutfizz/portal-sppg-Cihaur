@@ -58,7 +58,7 @@
 
   <div class="card">
     <h1>SIPRES QR</h1>
-    <p>Kios Absensi SPPG Jeungjing</p>
+    <p>Kios Absensi SPPG Cihaur</p>
 
     <input type="text" id="qrToken" placeholder="Scan / Ketik Token QR" autofocus>
 
@@ -73,7 +73,7 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbynGbjvyxeG1PcFwUxNGblKVuLsqOIWLqF4ZuPci23r23bvYgh9NhRjjTXVmcmf77uH/exec";
 
-    async function prosesAbsen(jenis) {
+    function prosesAbsen(jenis) {
       const tokenInput = document.getElementById("qrToken");
       const statusDiv = document.getElementById("status");
       const token = tokenInput.value.trim();
@@ -87,10 +87,14 @@
       statusDiv.style.color = "#ffb703";
       statusDiv.innerText = "Memproses absensi...";
 
-      try {
-        const response = await fetch(`${API_URL}?action=scanQR&qr_token=${encodeURIComponent(token)}&jenis=${jenis}`);
-        const result = await response.json();
+      const targetUrl = `${API_URL}?action=scanQR&qr_token=${encodeURIComponent(token)}&jenis=${jenis}`;
 
+      fetch(targetUrl, {
+        method: 'GET',
+        redirect: 'follow'
+      })
+      .then(response => response.json())
+      .then(result => {
         if (result.status === "success") {
           statusDiv.style.color = "#2a9d8f";
           statusDiv.innerText = `✅ ${result.message} (${result.nama} - ${result.waktu})`;
@@ -99,10 +103,11 @@
           statusDiv.style.color = "#ff4d4d";
           statusDiv.innerText = `❌ ${result.message}`;
         }
-      } catch (err) {
+      })
+      .catch(err => {
         statusDiv.style.color = "#ff4d4d";
         statusDiv.innerText = "Gagal terhubung ke server!";
-      }
+      });
     }
   </script>
 </body>
